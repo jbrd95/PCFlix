@@ -35,6 +35,7 @@
             this.refreshToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteSelectionToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteAndBlacklistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SeriesLabel = new System.Windows.Forms.Label();
             this.EpisodeListBox = new System.Windows.Forms.ListView();
             this.EpisodeRightClickMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -56,7 +57,7 @@
             this.NextEpisodePanel = new System.Windows.Forms.Panel();
             this.PrevEpisodePanel = new System.Windows.Forms.Panel();
             this.MarkSkippedButton = new System.Windows.Forms.Button();
-            this.deleteAndBlacklistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SeriesRightClickMenu.SuspendLayout();
             this.EpisodeRightClickMenu.SuspendLayout();
             this.SuspendLayout();
@@ -83,7 +84,7 @@
             this.deleteSelectionToolStripMenuItem1,
             this.deleteAndBlacklistToolStripMenuItem});
             this.SeriesRightClickMenu.Name = "contextMenuStrip1";
-            this.SeriesRightClickMenu.Size = new System.Drawing.Size(177, 98);
+            this.SeriesRightClickMenu.Size = new System.Drawing.Size(177, 76);
             // 
             // refreshToolStripMenuItem1
             // 
@@ -103,6 +104,15 @@
             this.deleteSelectionToolStripMenuItem1.Size = new System.Drawing.Size(176, 22);
             this.deleteSelectionToolStripMenuItem1.Text = "Delete Selection";
             this.deleteSelectionToolStripMenuItem1.Click += new System.EventHandler(this.deleteSelectionToolStripMenuItem1_Click);
+            // 
+            // deleteAndBlacklistToolStripMenuItem
+            // 
+            this.deleteAndBlacklistToolStripMenuItem.Name = "deleteAndBlacklistToolStripMenuItem";
+            this.deleteAndBlacklistToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.deleteAndBlacklistToolStripMenuItem.Text = "Delete and Blacklist";
+            this.deleteAndBlacklistToolStripMenuItem.ToolTipText = "Removes the records as well as preventing the application from adding this series" +
+    " upon refresh or restarting the application.";
+            this.deleteAndBlacklistToolStripMenuItem.Click += new System.EventHandler(this.deleteAndBlacklistToolStripMenuItem_Click);
             // 
             // SeriesLabel
             // 
@@ -289,20 +299,22 @@
             this.MarkSkippedButton.UseVisualStyleBackColor = true;
             this.MarkSkippedButton.Click += new System.EventHandler(this.MarkSkippedButton_Click);
             // 
-            // deleteAndBlacklistToolStripMenuItem
+            // checkBox1
             // 
-            this.deleteAndBlacklistToolStripMenuItem.Name = "deleteAndBlacklistToolStripMenuItem";
-            this.deleteAndBlacklistToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.deleteAndBlacklistToolStripMenuItem.Text = "Delete and Blacklist";
-            this.deleteAndBlacklistToolStripMenuItem.ToolTipText = "Removes the records as well as preventing the application from adding this series" +
-    " upon refresh or restarting the application.";
-            this.deleteAndBlacklistToolStripMenuItem.Click += new System.EventHandler(this.deleteAndBlacklistToolStripMenuItem_Click);
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(54, 8);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(141, 17);
+            this.checkBox1.TabIndex = 13;
+            this.checkBox1.Text = "Show Completed Shows";
+            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 593);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.MarkSkippedButton);
             this.Controls.Add(this.PrevEpisodePanel);
             this.Controls.Add(this.NextEpisodePanel);
@@ -355,6 +367,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem deleteSelectionToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem deleteAndBlacklistToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 
