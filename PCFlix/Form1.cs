@@ -515,7 +515,11 @@ namespace PCFlix
 
             foreach (string key in Series.Keys)
             {
-                SeriesListBox.Items.Add(key);
+                //if filter is enabled, only display unfinished series; otherwise let all series show
+                if (!filterShowsCheck.Checked && Series[key].isWatched == 0 || filterShowsCheck.Checked)
+                {
+                    SeriesListBox.Items.Add(key);
+                }
             }
         }
 
@@ -570,6 +574,12 @@ namespace PCFlix
 
 
         #endregion
+
+        private void filterShowsCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadSeriesFromDictionary(seriesDict);
+        }
+
     }
 
     

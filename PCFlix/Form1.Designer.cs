@@ -57,7 +57,7 @@
             this.NextEpisodePanel = new System.Windows.Forms.Panel();
             this.PrevEpisodePanel = new System.Windows.Forms.Panel();
             this.MarkSkippedButton = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.filterShowsCheck = new System.Windows.Forms.CheckBox();
             this.SeriesRightClickMenu.SuspendLayout();
             this.EpisodeRightClickMenu.SuspendLayout();
             this.SuspendLayout();
@@ -299,22 +299,23 @@
             this.MarkSkippedButton.UseVisualStyleBackColor = true;
             this.MarkSkippedButton.Click += new System.EventHandler(this.MarkSkippedButton_Click);
             // 
-            // checkBox1
+            // filterShowsCheck
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(54, 8);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(141, 17);
-            this.checkBox1.TabIndex = 13;
-            this.checkBox1.Text = "Show Completed Shows";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.filterShowsCheck.AutoSize = true;
+            this.filterShowsCheck.Location = new System.Drawing.Point(54, 8);
+            this.filterShowsCheck.Name = "filterShowsCheck";
+            this.filterShowsCheck.Size = new System.Drawing.Size(141, 17);
+            this.filterShowsCheck.TabIndex = 13;
+            this.filterShowsCheck.Text = "Show Completed Shows";
+            this.filterShowsCheck.UseVisualStyleBackColor = true;
+            this.filterShowsCheck.CheckedChanged += new System.EventHandler(this.filterShowsCheck_CheckedChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 593);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.filterShowsCheck);
             this.Controls.Add(this.MarkSkippedButton);
             this.Controls.Add(this.PrevEpisodePanel);
             this.Controls.Add(this.NextEpisodePanel);
@@ -367,7 +368,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem deleteSelectionToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem deleteAndBlacklistToolStripMenuItem;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox filterShowsCheck;
     }
 }
 
