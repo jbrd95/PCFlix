@@ -14,7 +14,7 @@ namespace PCFlix
     public partial class Form1 : Form
     {
 
-        Dictionary<string, Dictionary<string, Episode>> series;
+        Dictionary<string, Series> seriesDict;
         string CurrentEpisode;
         string CurrentSeries;
 
@@ -64,60 +64,24 @@ namespace PCFlix
             }
 
             //Holds all episodes in heieracrhy series->episodes->episode data
-            series = new Dictionary<string, Dictionary<string, Episode>>();
+            seriesDict = new Dictionary<string, Series>();
 
            
 
 
-            LoadEpisodesFromSaveFile(series, "PCFlix.dat");
+            LoadEpisodesFromSaveFile(seriesDict, "PCFlix.dat");
             #endregion
 
             #region Populate Episode Dictionary
-            //Get all files in the root folder
-            String[] files = Directory.GetFiles(MediaDirectory, "*", SearchOption.AllDirectories);
 
-            //go through each file and add it to the dict if it is a video
-            string[] tempFile;
-            string tempFolder;
-            string tempName;
+            LoadEpisodesFromDirectory(seriesDict, MediaDirectory);
+
             
-            foreach (string fileName in files)
-            {
-                if (IsCorrectFileType(fileName, FileTypes))
-                {
-                    //get episode and series name
-                    tempFile = fileName.Split('\\');
-
-                    tempName = tempFile.Last();
-                    tempFolder = tempFile[tempFile.Length - 2];
-
-                    if (!BlackList.Contains(tempFolder)) //Checks to see if the series is blacklisted
-                    {
-
-                        //store in dictionary
-                        if (series.ContainsKey(tempFolder)) //check to see if the series is already in the dictionary
-                        {
-                            //only add episode data, not series data
-                            if (!series[tempFolder].ContainsKey(tempName)) //don't overwrite episode data if its already in there
-                            {
-                                series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
-                            }
-                        }
-                        else //create series entry
-                        {
-                            series.Add(tempFolder, new Dictionary<string, Episode>());
-
-                            //since we just created the series it will be empty, so add the episode
-                            series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
-                        }
-                    }
-                }
-            }
             #endregion
 
             //dictionary should now contain all video files
             //Next populate the SeriesListBox with the available series names.
-            LoadSeriesFromDictionary(series);
+            LoadSeriesFromDictionary(seriesDict);
 
 
 
@@ -138,9 +102,9 @@ namespace PCFlix
 
                     EpisodesLabel.Text = Convert.ToString(SeriesListBox.SelectedValue) + " Episodes";
 
-                    foreach (string episode in series[(string)SeriesListBox.SelectedItem].Keys)
+                    foreach (string episode in seriesDict[(string)SeriesListBox.SelectedItem].Episodes.Keys)
                     {
-                        Episode currentEpisode = series[(string)SeriesListBox.SelectedItem][episode];
+                        Episode currentEpisode = seriesDict[(string)SeriesListBox.SelectedItem].Episodes[episode];
 
 
                         EpisodeListBox.Items.Add(episode, currentEpisode.isWatched);
@@ -162,57 +126,12 @@ namespace PCFlix
             else
                 lastSeries = "";
 
-            #region copy of populate episode diction region
-            //Get all files in the root folder
-            String[] files = Directory.GetFiles(MediaDirectory, "*", SearchOption.AllDirectories);
-
-            //go through each file and add it to the dict if it is a video
-            string[] tempFile;
-            string tempFolder;
-            string tempName;
-
-            foreach (string fileName in files)
-            {
-                if (IsCorrectFileType(fileName, FileTypes))
-                {
-                    
-                    //get episode and series name
-                    tempFile = fileName.Split('\\');
-
-                    tempName = tempFile.Last();
-                    tempFolder = tempFile[tempFile.Length - 2];
-
-                    if (!BlackList.Contains(tempFolder)) //Checks to see if the series is black listed
-                    {
-                        //store in dictionary
-                        if (series.ContainsKey(tempFolder)) //check to see if the series is already in the dictionary
-                        {
-                            //only add episode data, not series data
-                            if (!series[tempFolder].ContainsKey(tempName)) //don't overwrite episode data if its already in there
-                            {
-                                series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
-                            }
-                        }
-                        else //create series entry
-                        {
-                            series.Add(tempFolder, new Dictionary<string, Episode>());
-
-                            //since we just created the series it will be empty, so add the episode
-                            series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
-                        }
-                    }
-                }
-            }
-            #endregion
+            LoadEpisodesFromDirectory(seriesDict, MediaDirectory);
 
             //dictionary should now contain all video files
             //Next populate the SeriesListBox with the available series names.
-            SeriesListBox.Items.Clear();
 
-            foreach (string key in series.Keys)
-            {
-                SeriesListBox.Items.Add(key);
-            }
+            LoadSeriesFromDictionary(seriesDict);
 
             try
             {
@@ -230,7 +149,7 @@ namespace PCFlix
 
         private void deleteSelectionToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            series.Remove(SeriesListBox.SelectedItem.ToString());
+            seriesDict.Remove(SeriesListBox.SelectedItem.ToString());
 
             SeriesListBox.Items.Remove(SeriesListBox.SelectedItem);
 
@@ -258,13 +177,13 @@ namespace PCFlix
                     CurrentSeriesLabel.Text = CurrentSeries = (string)SeriesListBox.SelectedItem;
                     CurrentEpisodeLabel.Text = CurrentEpisode = EpisodeListBox.SelectedItems[0].Text;
 
-                    CurrentEpisodePanel.BackgroundImage = WatchedImageList.Images[series[CurrentSeries][CurrentEpisode].isWatched];
+                    CurrentEpisodePanel.BackgroundImage = WatchedImageList.Images[seriesDict[CurrentSeries].Episodes[CurrentEpisode].isWatched];
 
                     //get previous episode image on display panel
                     if (EpisodeListBox.SelectedIndices[0] > 0)
                     {
                         string episodeName = EpisodeListBox.Items[EpisodeListBox.SelectedIndices[0] - 1].Text;
-                        PrevEpisodePanel.BackgroundImage = WatchedImageList.Images[series[CurrentSeries][episodeName].isWatched];
+                        PrevEpisodePanel.BackgroundImage = WatchedImageList.Images[seriesDict[CurrentSeries].Episodes[episodeName].isWatched];
                     }
                     else
                     {
@@ -275,7 +194,7 @@ namespace PCFlix
                     if (EpisodeListBox.SelectedIndices[0] < EpisodeListBox.Items.Count - 1)
                     {
                         string episodeName = EpisodeListBox.Items[EpisodeListBox.SelectedIndices[0] + 1].Text;
-                        NextEpisodePanel.BackgroundImage = WatchedImageList.Images[series[CurrentSeries][episodeName].isWatched];
+                        NextEpisodePanel.BackgroundImage = WatchedImageList.Images[seriesDict[CurrentSeries].Episodes[episodeName].isWatched];
                     }
                     else
                     {
@@ -297,7 +216,7 @@ namespace PCFlix
             foreach (int index in EpisodeListBox.SelectedIndices)
             {
                 string episodeName = EpisodeListBox.Items[index].Text;
-                series[CurrentSeries][episodeName].isWatched = 1;
+                seriesDict[CurrentSeries].Episodes[episodeName].isWatched = 1;
             }
 
             //grab selected index
@@ -316,7 +235,7 @@ namespace PCFlix
             foreach (int index in EpisodeListBox.SelectedIndices)
             {
                 string episodeName = EpisodeListBox.Items[index].Text;
-                series[CurrentSeries][episodeName].isWatched = 2;
+                seriesDict[CurrentSeries].Episodes[episodeName].isWatched = 2;
             }
 
             //grab selected index
@@ -335,7 +254,7 @@ namespace PCFlix
             foreach (int index in EpisodeListBox.SelectedIndices)
             {
                 string episodeName = EpisodeListBox.Items[index].Text;
-                series[CurrentSeries][episodeName].isWatched = 0;
+                seriesDict[CurrentSeries].Episodes[episodeName].isWatched = 0;
             }
 
             //grab selected index
@@ -372,7 +291,7 @@ namespace PCFlix
         {
             foreach (ListViewItem item in EpisodeListBox.SelectedItems)
             {
-                series[CurrentSeries].Remove(item.Text);
+                seriesDict[CurrentSeries].Episodes.Remove(item.Text);
                 EpisodeListBox.Items.Remove(item);
             }
 
@@ -413,10 +332,10 @@ namespace PCFlix
 
         private void PlayVideoButton_Click(object sender, EventArgs e)
         {
-            Process.Start(series[CurrentSeries][CurrentEpisode].fullPath);
+            Process.Start(seriesDict[CurrentSeries].Episodes[CurrentEpisode].fullPath);
 
             //mark video as watched
-            series[CurrentSeries][CurrentEpisode].isWatched = 1;
+            seriesDict[CurrentSeries].Episodes[CurrentEpisode].isWatched = 1;
 
             //get next episode
             int selectedIndex = EpisodeListBox.SelectedIndices[0];
@@ -446,7 +365,7 @@ namespace PCFlix
         private void MarkSkippedButton_Click(object sender, EventArgs e)
         {
             //mark video as skipped
-            series[CurrentSeries][CurrentEpisode].isWatched = 2;
+            seriesDict[CurrentSeries].Episodes[CurrentEpisode].isWatched = 2;
 
             //get next episode
             int selectedIndex = EpisodeListBox.SelectedIndices[0];
@@ -488,7 +407,7 @@ namespace PCFlix
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             //form is closing save all data to PCFlix.data
-            SaveAllData(series);
+            SaveAllData(seriesDict);
         }
 
         private void EpisodeListBox_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -498,7 +417,7 @@ namespace PCFlix
         }
 
         #region Functions
-        void LoadEpisodesFromDirectory(Dictionary<string, Dictionary<string, Episode>> seriesDict, string directory)
+        void LoadEpisodesFromDirectory(Dictionary<string, Series> seriesDict, string directory)
         {
             //Get all files in the root folder
             String[] files = Directory.GetFiles(MediaDirectory, "*", SearchOption.AllDirectories);
@@ -522,27 +441,29 @@ namespace PCFlix
                     {
 
                         //store in dictionary
-                        if (series.ContainsKey(tempFolder)) //check to see if the series is already in the dictionary
+                        if (seriesDict.ContainsKey(tempFolder)) //check to see if the series is already in the dictionary
                         {
                             //only add episode data, not series data
-                            if (!series[tempFolder].ContainsKey(tempName)) //don't overwrite episode data if its already in there
+                            if (!seriesDict[tempFolder].Episodes.ContainsKey(tempName)) //don't overwrite episode data if its already in there
                             {
-                                series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
+                                seriesDict[tempFolder].Episodes.Add(tempName, new Episode(tempName, tempFolder, fileName));
+                                seriesDict[tempFolder].isWatched = 0;
                             }
                         }
                         else //create series entry
                         {
-                            series.Add(tempFolder, new Dictionary<string, Episode>());
+                            seriesDict.Add(tempFolder, new Series(tempFolder, "0"));
 
                             //since we just created the series it will be empty, so add the episode
-                            series[tempFolder].Add(tempName, new Episode(tempName, tempFolder, fileName));
+                            seriesDict[tempFolder].Episodes.Add(tempName, new Episode(tempName, tempFolder, fileName));
                         }
+                        
                     }
                 }
             }
         }
 
-        void LoadEpisodesFromSaveFile(Dictionary<string, Dictionary<string, Episode>> seriesDict, string file)
+        void LoadEpisodesFromSaveFile(Dictionary<string, Series> seriesDict, string file)
         {
             if (File.Exists("PCFlix.dat"))
             {
@@ -558,17 +479,24 @@ namespace PCFlix
                     if (seriesDict.ContainsKey(dataSplit[1])) //check to see if the series is already in the dictionary
                     {
                         //only add episode data, not series data
-                        if (!seriesDict[dataSplit[1]].ContainsKey(dataSplit[0])) //don't overwrite episode data if its already in there
+                        if (!seriesDict[dataSplit[1]].Episodes.ContainsKey(dataSplit[0])) //don't overwrite episode data if its already in there
                         {
-                            seriesDict[dataSplit[1]].Add(dataSplit[0], new Episode(dataSplit[0], dataSplit[1], dataSplit[2], dataSplit[3]));
+                            seriesDict[dataSplit[1]].Episodes.Add(dataSplit[0], new Episode(dataSplit[0], dataSplit[1], dataSplit[2], dataSplit[3]));
                         }
                     }
                     else //create series entry
                     {
-                        seriesDict.Add(dataSplit[1], new Dictionary<string, Episode>());
+                        seriesDict.Add(dataSplit[1], new Series(dataSplit[1], "1"));
 
                         //since we just created the series it will be empty, so add the episode
-                        seriesDict[dataSplit[1]].Add(dataSplit[0], new Episode(dataSplit[0], dataSplit[1], dataSplit[2], dataSplit[3]));
+                        seriesDict[dataSplit[1]].Episodes.Add(dataSplit[0], new Episode(dataSplit[0], dataSplit[1], dataSplit[2], dataSplit[3]));
+                        
+                    }
+
+                    //if an episode hasn't been watched, set series to in progress
+                    if (string.Compare(dataSplit[3], "0") == 0) 
+                    {
+                        seriesDict[dataSplit[1]].isWatched = 0;
                     }
                 }
 
@@ -580,7 +508,7 @@ namespace PCFlix
             }
         }
 
-        void LoadSeriesFromDictionary(Dictionary<string, Dictionary<string, Episode>> Series)
+        void LoadSeriesFromDictionary(Dictionary<string, Series> Series)
         {
             
             SeriesListBox.Items.Clear();
@@ -591,7 +519,7 @@ namespace PCFlix
             }
         }
 
-        void LoadEpisodesFromDictionary(Dictionary<string, Dictionary<string, Episode>> Series)
+        void LoadEpisodesFromDictionary(Dictionary<string, Series> series)
         {
             //Fill the list view with videos from the selected series in the Series list box
             EpisodeListBox.Items.Clear();
@@ -600,9 +528,9 @@ namespace PCFlix
             {
                 EpisodesLabel.Text = Convert.ToString(SeriesListBox.SelectedValue) + " Episodes";
 
-                foreach (string episode in Series[(string)SeriesListBox.SelectedItem].Keys)
+                foreach (string episode in series[(string)SeriesListBox.SelectedItem].Episodes.Keys)
                 {
-                    Episode currentEpisode = Series[(string)SeriesListBox.SelectedItem][episode];
+                    Episode currentEpisode = series[(string)SeriesListBox.SelectedItem].Episodes[episode];
 
 
                     EpisodeListBox.Items.Add(episode, currentEpisode.isWatched);
@@ -610,7 +538,7 @@ namespace PCFlix
             }
         }
 
-        void SaveAllData(Dictionary<string, Dictionary<string, Episode>> Series)
+        void SaveAllData(Dictionary<string, Series> series)
         {
             //save all data to PCFlix.data
             File.Delete("PCFlix.dat.backup");
@@ -618,14 +546,14 @@ namespace PCFlix
             FileStream file = File.Create("PCFlix.dat");
             file.Close();
 
-            foreach (string key in Series.Keys)
+            foreach (string key in series.Keys)
             {
-                foreach (string key2 in Series[key].Keys)
+                foreach (string key2 in series[key].Episodes.Keys)
                 {
-                    File.AppendAllText("PCFlix.dat", Series[key][key2].episodeName + "|" +
-                                                     Series[key][key2].seriesName + "|" +
-                                                     Series[key][key2].fullPath + "|" +
-                                                     Series[key][key2].isWatched + "\n");
+                    File.AppendAllText("PCFlix.dat", series[key].Episodes[key2].episodeName + "|" +
+                                                     series[key].Episodes[key2].seriesName + "|" +
+                                                     series[key].Episodes[key2].fullPath + "|" +
+                                                     series[key].Episodes[key2].isWatched + "\n");
                 }
             }
 
@@ -680,6 +608,7 @@ namespace PCFlix
         {
             seriesName = series;
             isWatched = Convert.ToInt16(watched);
+            Episodes = new Dictionary<string,Episode>();
         }
     }
 }
